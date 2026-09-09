@@ -1,0 +1,12 @@
+numpy
+pandas
+matplotlib
+scikit-learn
+pillow
+flask
+pymongo
+torch
+torchvision
+grad-cam
+requests
+kaggle

@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Datasets & Heavy Raw Data
+data_raw/
+dataset/
+dataset_real/
+dataset_backup/
+uploads/*
+!uploads/.gitkeep
+
+# Models & Weights (>100MB files excluded for GitHub limits)
+model/*.pth
+model/*.pt
+!model/.gitkeep
+model/gradcam/*
+!model/gradcam/.gitkeep
+results/*.png
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
