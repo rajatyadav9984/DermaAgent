@@ -10,3 +10,5 @@ torchvision
 grad-cam
 requests
 kaggle
+pyyaml
+pytest

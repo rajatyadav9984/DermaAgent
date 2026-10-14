@@ -4,13 +4,20 @@ echo ============================================================
 echo Starting DermaAgent Server & Opening Web App...
 echo ============================================================
 
-cd /d C:\DermaAgent
+cd /d "%~dp0"
 
-:: Open browser automatically after 2 seconds delay
-timeout /t 2 /nobreak >nul
-start http://127.0.0.1:5000/
+if not exist ".venv\Scripts\python.exe" (
+    echo [ERROR] Virtual environment .venv not found!
+    echo Please make sure you run this script from C:\DermaAgent
+    pause
+    exit /b 1
+)
 
-:: Start Flask Backend Server
-.\.venv\Scripts\python.exe backend\app.py
+:: Start Flask Backend Server (Opens browser automatically when server is ready)
+".venv\Scripts\python.exe" backend\app.py
 
 pause
+
+
+
+

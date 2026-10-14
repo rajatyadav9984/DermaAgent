@@ -1,0 +1,58 @@
+# DermaAgent - Dataset Configuration File
+dataset:
+  name: "ISIC2019_HAM10000"
+  random_seed: 42
+
+paths:
+  data_raw_ham: "data_raw/HAM10000"
+  data_raw_isic: "data_raw/ISIC2019"
+  ham_dataset: "dataset_real"
+  isic_images_zip: "data_raw/ISIC2019/ISIC_2019_Training_Input.zip"
+  isic_gt_csv: "data_raw/ISIC2019/ISIC_2019_Training_GroundTruth.csv"
+  isic_meta_csv: "data_raw/ISIC2019/ISIC_2019_Training_Metadata.csv"
+  extracted_images_dir: "data_raw/ISIC2019/images"
+  results_dir: "results"
+
+taxonomy:
+  # Existing 7-class HAM10000 model mapping
+  ham10000_classes:
+    - akiec
+    - bcc
+    - bkl
+    - df
+    - mel
+    - nv
+    - vasc
+
+  # 8-class ISIC 2019 challenge mapping
+  isic2019_classes:
+    - MEL
+    - NV
+    - BCC
+    - AK
+    - BKL
+    - DF
+    - VASC
+    - SCC
+
+  class_descriptions:
+    MEL: "Melanoma (Malignant)"
+    NV: "Melanocytic Nevi / Moles (Benign)"
+    BCC: "Basal Cell Carcinoma (Malignant)"
+    AK: "Actinic Keratosis / Bowen's (Pre-cancerous)"
+    BKL: "Benign Keratosis (Benign)"
+    DF: "Dermatofibroma (Benign)"
+    VASC: "Vascular Lesion (Benign)"
+    SCC: "Squamous Cell Carcinoma (Malignant)"
+    akiec: "Actinic Keratosis / Bowen's Disease"
+    bcc: "Basal Cell Carcinoma"
+    bkl: "Benign Keratosis"
+    df: "Dermatofibroma"
+    mel: "Melanoma"
+    nv: "Melanocytic Nevi"
+    vasc: "Vascular Lesion"
+
+split:
+  train_ratio: 0.80
+  val_ratio: 0.20
+  leakage_aware_by_lesion: true

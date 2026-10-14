@@ -6,8 +6,14 @@ __pycache__/
 env/
 venv/
 ENV/
+*.egg-info/
+
+# Environment & Secrets
+.env
+.env.local
 
 # Datasets & Heavy Raw Data
+data/
 data_raw/
 dataset/
 dataset_real/
@@ -15,13 +21,30 @@ dataset_backup/
 uploads/*
 !uploads/.gitkeep
 
-# Models & Weights (>100MB files excluded for GitHub limits)
+# Models & Weights (Heavy weights > 100MB ignored for GitHub limit)
 model/*.pth
 model/*.pt
 !model/.gitkeep
+!model/isic2019_class_weights.pt
+!model/class_weights.pt
 model/gradcam/*
 !model/gradcam/.gitkeep
+
+# Results & Plots
 results/*.png
+results/confusion_matrix/*
+!results/confusion_matrix/.gitkeep
+results/plots/*
+!results/plots/.gitkeep
+
+# Logs
+logs/
+*.log
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
 
 # IDE & OS
 .vscode/

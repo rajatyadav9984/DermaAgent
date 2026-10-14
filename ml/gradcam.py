@@ -1,3 +1,7 @@
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 from pathlib import Path
 
 import torch
@@ -39,14 +43,6 @@ DEVICE = torch.device(
     "cuda" if torch.cuda.is_available() else "cpu"
 )
 
-print("=" * 60)
-print("DermaAgent - Real ResNet18 Grad-CAM")
-print("=" * 60)
-
-print(f"[INFO] Device: {DEVICE}")
-print(f"[INFO] Model: {MODEL_PATH}")
-print(f"[INFO] Test directory: {TEST_DIR}")
-
 
 # ============================================================
 # LOAD MODEL
@@ -71,11 +67,8 @@ if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
     checkpoint = checkpoint["model_state_dict"]
 
 model.load_state_dict(checkpoint)
-
 model = model.to(DEVICE)
 model.eval()
-
-print("[SUCCESS] Real ResNet18 model loaded")
 
 
 # ============================================================
@@ -93,23 +86,7 @@ transform = transforms.Compose([
 
 
 # ============================================================
-# FIND A REAL TEST IMAGE
-# ============================================================
-
-image_files = list(TEST_DIR.rglob("*.jpg"))
-
-if not image_files:
-    raise FileNotFoundError(
-        f"No JPG images found inside {TEST_DIR}"
-    )
-
-test_img = image_files[0]
-
-print(f"[INFO] Selected test image: {test_img}")
-
-
-# ============================================================
-# GRAD-CAM STORAGE
+# GRAD-CAM STORAGE & GENERATION
 # ============================================================
 
 activations = None
@@ -126,186 +103,93 @@ def backward_hook(module, grad_input, grad_output):
     gradients = grad_output[0]
 
 
-# ResNet18 final convolutional block
-target_layer = model.layer4[-1]
-
-forward_handle = target_layer.register_forward_hook(
-    forward_hook
-)
-
-backward_handle = target_layer.register_full_backward_hook(
-    backward_hook
-)
-
-
-# ============================================================
-# GENERATE GRAD-CAM
-# ============================================================
-
-def generate_gradcam(image_path):
-
+def generate_gradcam(image_path, model_instance=None, class_names=None):
     global activations
     global gradients
 
-    original_image = Image.open(
-        image_path
-    ).convert("RGB")
+    activations = None
+    gradients = None
 
-    input_tensor = transform(
-        original_image
-    ).unsqueeze(0).to(DEVICE)
+    image_path = Path(image_path)
+    if not image_path.exists():
+        raise FileNotFoundError(f"Image not found: {image_path}")
 
-    model.zero_grad()
+    # Use explicitly passed model/classes or fall back to default loaded model
+    active_model = model_instance if model_instance is not None else model
+    active_classes = class_names if class_names is not None else CLASS_NAMES
 
-    output = model(input_tensor)
+    # Dynamically register hooks on ResNet18 final convolutional block
+    target_layer = active_model.layer4[-1]
+    forward_handle = target_layer.register_forward_hook(forward_hook)
+    backward_handle = target_layer.register_full_backward_hook(backward_hook)
 
-    probabilities = F.softmax(
-        output,
-        dim=1
-    )
+    try:
+        original_image = Image.open(image_path).convert("RGB")
+        input_tensor = transform(original_image).unsqueeze(0).to(DEVICE)
 
-    confidence, predicted_class = torch.max(
-        probabilities,
-        dim=1
-    )
+        active_model.zero_grad()
+        output = active_model(input_tensor)
 
-    predicted_index = predicted_class.item()
+        probabilities = F.softmax(output, dim=1)
+        confidence, predicted_class = torch.max(probabilities, dim=1)
 
-    predicted_name = CLASS_NAMES[
-        predicted_index
-    ]
+        predicted_index = predicted_class.item()
+        predicted_name = active_classes[predicted_index]
 
-    print()
-    print("=" * 60)
-    print("PREDICTION")
-    print("=" * 60)
+        score = output[0, predicted_index]
+        score.backward()
 
-    print(
-        f"Predicted class : {predicted_name}"
-    )
+        if gradients is None or activations is None:
+            raise RuntimeError("Gradients or activations were not captured.")
 
-    print(
-        f"Class index     : {predicted_index}"
-    )
+        weights = gradients.mean(dim=(2, 3), keepdim=True)
+        cam = (weights * activations).sum(dim=1)
+        cam = F.relu(cam)
+        cam = cam.squeeze().detach().cpu().numpy()
 
-    print(
-        f"Confidence      : "
-        f"{confidence.item() * 100:.2f}%"
-    )
+        cam -= cam.min()
+        if cam.max() != 0:
+            cam /= cam.max()
 
-    # Backpropagate predicted class
-    score = output[
-        0,
-        predicted_index
-    ]
+        cam_image = Image.fromarray(np.uint8(cam * 255))
+        cam_image = cam_image.resize(original_image.size)
+        cam_array = np.array(cam_image) / 255.0
 
-    score.backward()
+        fig = plt.figure(figsize=(8, 8))
+        plt.imshow(original_image)
+        plt.imshow(cam_array, cmap="jet", alpha=0.45)
+        plt.axis("off")
 
-    # --------------------------------------------------------
-    # Grad-CAM calculation
-    # --------------------------------------------------------
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        output_path = OUTPUT_DIR / f"gradcam_{predicted_name}_{image_path.stem}.jpg"
 
-    weights = gradients.mean(
-        dim=(2, 3),
-        keepdim=True
-    )
+        plt.savefig(output_path, bbox_inches="tight", pad_inches=0)
+        plt.close(fig)
 
-    cam = (
-        weights * activations
-    ).sum(dim=1)
+        return output_path
 
-    cam = F.relu(cam)
-
-    cam = cam.squeeze().detach().cpu().numpy()
-
-    # Normalize CAM
-    cam -= cam.min()
-
-    if cam.max() != 0:
-        cam /= cam.max()
-
-    # Resize CAM to original image size
-    cam_image = Image.fromarray(
-        np.uint8(cam * 255)
-    )
-
-    cam_image = cam_image.resize(
-        original_image.size
-    )
-
-    cam_array = np.array(
-        cam_image
-    ) / 255.0
-
-    # --------------------------------------------------------
-    # Create heatmap
-    # --------------------------------------------------------
-
-    import matplotlib.pyplot as plt
-
-    plt.figure(
-        figsize=(8, 8)
-    )
-
-    plt.imshow(
-        original_image
-    )
-
-    plt.imshow(
-        cam_array,
-        cmap="jet",
-        alpha=0.45
-    )
-
-    plt.axis("off")
-
-    OUTPUT_DIR.mkdir(
-        parents=True,
-        exist_ok=True
-    )
-
-    output_path = (
-        OUTPUT_DIR /
-        f"gradcam_{predicted_name}_{image_path.stem}.jpg"
-    )
-
-    plt.savefig(
-        output_path,
-        bbox_inches="tight",
-        pad_inches=0
-    )
-
-    plt.close()
-
-    print()
-    print(
-        f"[SUCCESS] Grad-CAM saved:"
-    )
-
-    print(
-        output_path
-    )
-
-    return output_path
+    finally:
+        forward_handle.remove()
+        backward_handle.remove()
 
 
 # ============================================================
-# RUN
+# STANDALONE TEST RUNNER
 # ============================================================
 
-try:
+if __name__ == "__main__":
+    print("=" * 60)
+    print("DermaAgent - Real ResNet18 Grad-CAM Test")
+    print("=" * 60)
+    print(f"[INFO] Device: {DEVICE}")
+    print(f"[INFO] Model: {MODEL_PATH}")
 
-    output = generate_gradcam(
-        test_img
-    )
+    image_files = list(TEST_DIR.rglob("*.jpg"))
+    if image_files:
+        test_img = image_files[0]
+        print(f"[INFO] Selected test image: {test_img}")
+        output = generate_gradcam(test_img)
+        print(f"[SUCCESS] Grad-CAM saved to: {output}")
+    else:
+        print("[WARNING] No test images found in dataset_real/test.")
 
-finally:
-
-    forward_handle.remove()
-    backward_handle.remove()
-
-
-print()
-print("=" * 60)
-print("[SUCCESS] Grad-CAM generation complete!")
-print("=" * 60)

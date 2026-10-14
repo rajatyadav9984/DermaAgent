@@ -3,11 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>DermaAgent | AI Skin Analysis</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -18,35 +15,37 @@
 
         <!-- Header -->
         <header class="header">
-
             <div class="logo">
                 <span class="logo-icon">✦</span>
                 <span>DermaAgent</span>
             </div>
-
-            <div class="status">
-                <span class="status-dot"></span>
-                AI System Online
+            <div class="header-controls">
+                <div class="model-select-wrapper">
+                    <label for="modelSelect">Model:</label>
+                    <select id="modelSelect" class="model-select">
+                        <option value="isic2019" selected>ISIC 2019 (8-Class ResNet18)</option>
+                        <option value="ham10000">HAM10000 (7-Class Baseline)</option>
+                    </select>
+                </div>
+                <div class="status">
+                    <span class="status-dot"></span>
+                    AI System Online
+                </div>
             </div>
-
         </header>
 
 
         <!-- Hero Section -->
         <section class="hero">
-
-            <p class="eyebrow">AI-POWERED SKIN SCREENING</p>
-
+            <p class="eyebrow">AI-POWERED SKIN DISEASE SCREENING</p>
             <h1>
-                Intelligent Skin
+                Intelligent Skin Disease
                 <span>Analysis</span>
             </h1>
-
             <p class="hero-description">
                 Upload a skin image and provide symptoms to generate
                 an AI-assisted multimodal analysis.
             </p>
-
         </section>
 
 
@@ -55,9 +54,7 @@
 
             <!-- Left Side -->
             <section class="card">
-
                 <h2>Skin Image</h2>
-
                 <p class="section-description">
                     Upload a clear image of the affected skin area.
                 </p>
@@ -65,65 +62,84 @@
 
                 <!-- Upload Area -->
                 <div class="upload-area" id="uploadArea">
-
                     <div class="upload-icon">
-                        ↑
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
                     </div>
-
-                    <h3>Drop your image here</h3>
-
-                    <p>
-                        or click to browse from your computer
+                    <h3>Upload Skin Image</h3>
+                    <p class="upload-subtitle">
+                        Choose how you want to provide your skin image
                     </p>
 
+                    <!-- Upload Options -->
+                    <div class="upload-options">
+                        <!-- Computer / Device Files Upload -->
+                        <button type="button" class="upload-option" id="computerUploadBtn">
+                            <span class="option-icon">📁</span>
+                            <span class="option-info">
+                                <strong>Upload from Computer / Device</strong>
+                                <small>Select JPG, JPEG, PNG from gallery or files</small>
+                            </span>
+                        </button>
+
+                        <!-- Live Camera Scanner -->
+                        <button type="button" class="upload-option option-camera" id="cameraUploadBtn">
+                            <span class="option-icon">📸</span>
+                            <span class="option-info">
+                                <strong>Take Live Photo</strong>
+                                <small>Open live camera with lesion guide</small>
+                            </span>
+                        </button>
+                    </div>
+
+                    <div class="drag-hint">
+                        <span>or drag and drop your image file here</span>
+                    </div>
+
                     <span class="file-types">
-                        JPG, JPEG, PNG
+                        Supports: JPG, JPEG, PNG, WEBP
                     </span>
 
-                    <input
-                        type="file"
-                        id="imageInput"
-                        accept="image/png,image/jpeg"
-                        hidden
-                    >
+                    <!-- Computer / Device File Input (Uses explicit extensions so mobile browsers open files directly without prompting camera) -->
+                    <input type="file" id="imageInput" accept=".jpg,.jpeg,.png,.webp" hidden>
 
+                    <!-- Camera Fallback Input (Used if WebRTC live camera is unavailable or denied) -->
+                    <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
                 </div>
 
 
                 <!-- Image Preview -->
                 <div class="preview-container" id="previewContainer">
-
-                    <img
-                        id="imagePreview"
-                        src=""
-                        alt="Skin image preview"
-                    >
-
-                    <button
-                        type="button"
-                        id="removeImage"
-                        class="remove-btn"
-                    >
-                        Remove
-                    </button>
-
+                    <div class="preview-header">
+                        <span id="previewSourceTag" class="preview-source-badge">📁 File Selected</span>
+                        <span id="previewFileInfo" class="preview-file-info"></span>
+                    </div>
+                    <div class="preview-image-wrapper">
+                        <img id="imagePreview" src="" alt="Skin image preview">
+                    </div>
+                    <div class="preview-actions">
+                        <button type="button" id="removeImage" class="remove-btn">
+                            ✕ Remove Image
+                        </button>
+                        <button type="button" id="changeImageBtn" class="change-btn">
+                            🔄 Select Another Image
+                        </button>
+                    </div>
                 </div>
-
             </section>
 
 
             <!-- Right Side -->
             <section class="card">
-
                 <h2>Symptoms</h2>
-
                 <p class="section-description">
                     Select the symptoms associated with the skin condition.
                 </p>
 
-
                 <div class="symptoms-grid">
-
                     <label class="symptom">
                         <input type="checkbox" value="itching">
                         <span>Itching</span>
@@ -173,131 +189,189 @@
                         <input type="checkbox" value="change_in_color">
                         <span>Change in Color</span>
                     </label>
-
                 </div>
 
 
                 <!-- Analyze Button -->
-                <button
-                    type="button"
-                    id="analyzeBtn"
-                    class="analyze-btn"
-                >
+                <button type="button" id="analyzeBtn" class="analyze-btn">
                     <span>Analyze Skin Image</span>
                     <span>→</span>
                 </button>
-
             </section>
-
         </main>
 
 
         <!-- Results Section -->
-        <section
-            class="results-section"
-            id="resultsSection"
-        >
-
+        <section class="results-section" id="resultsSection">
             <div class="results-header">
-
                 <div>
                     <p class="eyebrow">ANALYSIS RESULT</p>
                     <h2>AI Screening Report</h2>
+                    <span id="activeModelBadge" class="model-badge">ISIC 2019 ResNet18 (8 Classes)</span>
                 </div>
-
             </div>
 
+
+            <!-- Image Quality Card -->
+            <div id="qualityContainer" class="quality-card" style="display:none;"></div>
 
             <!-- Prediction Cards -->
             <div class="results-grid">
-
                 <div class="result-card">
-
                     <p class="result-label">
                         Top Prediction
                     </p>
-
                     <h3 id="predictionDisease">
                         —
                     </h3>
-
                     <p id="predictionConfidence">
                         Confidence: —
                     </p>
-
                 </div>
 
-
                 <div class="result-card">
-
                     <p class="result-label">
                         Reliability
                     </p>
-
                     <h3 id="uncertaintyLevel">
                         —
                     </h3>
-
                     <p id="reliabilityAdvisory">
                         —
                     </p>
-
                 </div>
-
             </div>
 
+            <!-- Clinical Screening Priority & Risk Assessment -->
+            <div class="card" id="riskCard">
+                <h2>Clinical Screening Priority</h2>
+                <div id="riskContainer"></div>
+            </div>
 
             <!-- Top 3 -->
             <div class="card">
-
                 <h2>Top-3 Predictions</h2>
-
                 <div id="top3Container"></div>
-
             </div>
-
 
             <!-- Explainability -->
             <div class="card">
-
                 <h2>Explainable AI</h2>
-
                 <p class="section-description">
                     Grad-CAM visualization showing the image regions
                     that contributed to the model prediction.
                 </p>
 
                 <div class="gradcam-container">
-
-                    <img
-                        id="gradcamImage"
-                        src=""
-                        alt="Grad-CAM visualization"
-                    >
-
+                    <img id="gradcamImage" src="" alt="Grad-CAM visualization">
                 </div>
-
             </div>
 
+            <!-- Doctor Consultation Follow-up Questions -->
+            <div class="card" id="questionsCard">
+                <h2>Clinical History & Consultation Questions</h2>
+                <p class="section-description" id="questionsSummaryPrompt">
+                    Targeted questions identified by the AI agent to discuss with your doctor or dermatologist.
+                </p>
+                <div id="questionsContainer"></div>
+            </div>
         </section>
 
 
         <!-- Footer -->
         <footer>
-
             <p>
                 DermaAgent — AI-assisted skin screening prototype
             </p>
-
             <p class="disclaimer">
                 This system is a technical research prototype and
                 is not a substitute for professional medical diagnosis.
             </p>
-
         </footer>
 
     </div>
 
+    <!-- ============================================================
+         Live Camera Viewfinder Modal
+         ============================================================ -->
+    <div class="camera-modal-overlay" id="cameraModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="cameraModalTitle">
+        <div class="camera-modal-content">
+            <!-- Modal Header -->
+            <div class="camera-modal-header">
+                <div class="camera-title-group">
+                    <span class="camera-status-dot"></span>
+                    <h3 id="cameraModalTitle">Live Skin Lesion Scanner</h3>
+                </div>
+                <button type="button" class="camera-close-btn" id="closeCameraBtn" aria-label="Close camera">&times;</button>
+            </div>
+
+            <!-- Viewfinder Area -->
+            <div class="camera-viewfinder-container">
+                <!-- Live Video Feed -->
+                <video id="cameraVideo" autoplay playsinline muted></video>
+
+                <!-- Hidden Capture Canvas -->
+                <canvas id="cameraCanvas" style="display: none;"></canvas>
+
+                <!-- Snapshot Image Preview (Used in review mode) -->
+                <img id="cameraSnapshotPreview" class="camera-snapshot-preview" style="display: none;" alt="Captured skin snapshot">
+
+                <!-- Lesion Centering Reticle -->
+                <div class="camera-reticle" id="cameraReticle">
+                    <div class="reticle-corner top-left"></div>
+                    <div class="reticle-corner top-right"></div>
+                    <div class="reticle-corner bottom-left"></div>
+                    <div class="reticle-corner bottom-right"></div>
+                    <div class="reticle-circle">
+                        <div class="reticle-pulse"></div>
+                    </div>
+                    <div class="reticle-crosshair-h"></div>
+                    <div class="reticle-crosshair-v"></div>
+                </div>
+
+                <!-- Guidance Banner -->
+                <div class="camera-guidance-pill" id="cameraGuidance">
+                    <span class="guidance-icon">🎯</span>
+                    <span id="cameraGuidanceText">Center lesion inside the ring • Keep steady & well lit</span>
+                </div>
+
+                <!-- Camera Flash Animation -->
+                <div class="camera-flash" id="cameraFlash"></div>
+            </div>
+
+            <!-- Modal Controls Toolbar -->
+            <div class="camera-controls-bar">
+                <!-- Live Video Mode Controls -->
+                <div class="camera-stream-controls" id="cameraStreamControls">
+                    <button type="button" class="camera-tool-btn" id="flipCameraBtn" title="Switch front / rear camera">
+                        <span class="tool-icon">🔄</span>
+                        <span class="tool-label">Flip Camera</span>
+                    </button>
+
+                    <button type="button" class="camera-shutter-btn" id="shutterBtn" title="Take photo">
+                        <div class="shutter-inner"></div>
+                    </button>
+
+                    <button type="button" class="camera-tool-btn" id="cancelCameraBtn" title="Cancel and close camera">
+                        <span class="tool-icon">✕</span>
+                        <span class="tool-label">Cancel</span>
+                    </button>
+                </div>
+
+                <!-- Review Snapshot Mode Controls -->
+                <div class="camera-review-controls" id="cameraReviewControls" style="display: none;">
+                    <button type="button" class="btn-camera-retake" id="retakePhotoBtn">
+                        <span class="action-icon">↺</span>
+                        <span>Retake Photo</span>
+                    </button>
+                    <button type="button" class="btn-camera-use" id="usePhotoBtn">
+                        <span class="action-icon">✓</span>
+                        <span>Use This Photo</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 

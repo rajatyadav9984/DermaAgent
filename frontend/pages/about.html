@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | DermaAgent AI Skin Lesion Research</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">✦</span>
+                <span>DermaAgent</span>
+            </div>
+            <div>
+                <a href="../index.html" style="color:var(--text-secondary); text-decoration:none; font-weight:600;">← Back to Screening</a>
+            </div>
+        </header>
+
+        <section class="hero" style="text-align:left; max-width:800px; margin:40px auto;">
+            <p class="eyebrow">RESEARCH & ARCHITECTURE</p>
+            <h1>About <span>DermaAgent</span></h1>
+            <p class="hero-description" style="margin-top:16px;">
+                DermaAgent is an AI-assisted skin lesion image classification research prototype designed to explore deep learning interpretability, predictive uncertainty estimation, and multi-agent clinical decision support.
+            </p>
+
+            <div class="card" style="margin-top:30px;">
+                <h2>Core Machine Learning Models</h2>
+                <ul style="color:var(--text-secondary); line-height:1.8; margin-left:20px; margin-top:12px;">
+                    <li><strong>HAM10000 7-Class Baseline (ResNet18)</strong>: Trained on 10,015 dermatoscopic images across 7 diagnostic categories (Actinic Keratosis, Basal Cell Carcinoma, Benign Keratosis, Dermatofibroma, Melanoma, Melanocytic Nevi, Vascular Lesion).</li>
+                    <li><strong>ISIC 2019 8-Class Classifier (ResNet18 Transfer Learning)</strong>: Trained on 25,331 challenge images incorporating Squamous Cell Carcinoma (SCC) with strict lesion-level patient separation.</li>
+                </ul>
+            </div>
+
+            <div class="card" style="margin-top:24px;">
+                <h2>Interpretability & Uncertainty</h2>
+                <p class="section-description" style="line-height:1.7;">
+                    Standard deep learning models often produce overconfident false predictions on out-of-distribution or noisy images. DermaAgent integrates:
+                </p>
+                <ul style="color:var(--text-secondary); line-height:1.8; margin-left:20px; margin-top:12px;">
+                    <li><strong>Shannon Entropy Quantification</strong>: Mathematically bounds prediction uncertainty into Low, Moderate, and High tiers.</li>
+                    <li><strong>Grad-CAM Visual Heatmaps</strong>: Highlights the exact visual lesion regions influencing convolutional layer activations.</li>
+                </ul>
+            </div>
+
+            <div class="card" style="margin-top:24px; border-color:rgba(239, 68, 68, 0.3);">
+                <h2 style="color:#ef4444;">Medical & Legal Disclaimer</h2>
+                <p class="section-description" style="line-height:1.7;">
+                    DermaAgent is strictly an educational and technical research tool. It does <strong>not</strong> provide a medical diagnosis or treatment plan. Always consult a certified dermatologist or licensed medical healthcare provider for any skin condition assessment.
+                </p>
+            </div>
+        </section>
+
+        <footer>
+            <p>DermaAgent — AI-assisted skin screening prototype</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+# DermaAgent - Model Architecture & Training Configuration
+models:
+  # Real 7-class HAM10000 model (Preserved baseline)
+  ham10000_baseline:
+    architecture: "resnet18"
+    checkpoint_path: "model/real_skin_disease_model.pth"
+    num_classes: 7
+    image_size: 224
+    input_channels: 3
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+
+  # ISIC 2019 8-class model
+  isic2019_classifier:
+    backbone: "resnet18"
+    weights: "DEFAULT"
+    checkpoint_path: "model/isic2019_skin_disease_model.pth"
+    num_classes: 8
+    image_size: 224
+    input_channels: 3
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+
+training:
+  batch_size: 32
+  num_workers: 2
+  learning_rate: 0.0001
+  weight_decay: 0.00001
+  epochs: 15
+  early_stopping_patience: 4
+  optimizer: "AdamW"
+  scheduler: "CosineAnnealingLR"
+  mixed_precision: true
+
+inference:
+  max_upload_size_mb: 10
+  allowed_extensions: ["jpg", "jpeg", "png", "webp"]
+  entropy_thresholds:
+    low: 0.30
+    moderate: 0.60
